@@ -41,11 +41,13 @@ resource "aws_instance" "web" {
 }
 
 resource "aws_security_group" "web" {
-  name = "Dynamic Security Group"
+  name        = "Dynamic Security Group"
+  description = "Allow inbound HTTP traffic"
 
   dynamic "ingress" {
     for_each = var.allow_ports
     content {
+      description = "HTTP from VPC"
       from_port   = ingress.value
       to_port     = ingress.value
       protocol    = "tcp"
@@ -113,6 +115,7 @@ resource "aws_elb" "web" {
   availability_zones = [data.aws_availability_zones.available.names[0], data.aws_availability_zones.available.names[1]]
   security_groups    = [aws_security_group.web.id]
   internal           = true
+
   listener {
     lb_port           = 80
     lb_protocol       = "http"
