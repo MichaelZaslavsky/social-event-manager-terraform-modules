@@ -32,6 +32,9 @@ resource "aws_instance" "web" {
   instance_type          = var.instance_type
   vpc_security_group_ids = [aws_security_group.web.id]
   monitoring             = var.enable_detailed_monitoring
+  metadata_options {
+    http_tokens = "required"
+  }
 
   tags = merge(var.common_tags, { Name = "${var.common_tags["Environment"]} Server Build by Terraform" })
 }
