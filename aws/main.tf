@@ -33,15 +33,21 @@ resource "aws_instance" "web" {
   vpc_security_group_ids = [aws_security_group.web.id]
   monitoring             = var.enable_detailed_monitoring
 
+  metadata_options {
+    http_tokens = "required"
+  }
+
   tags = merge(var.common_tags, { Name = "${var.common_tags["Environment"]} Server Build by Terraform" })
 }
 
 resource "aws_security_group" "web" {
-  name = "Dynamic Security Group"
+  name        = "Dynamic Security Group"
+  description = "Allow inbound HTTP traffic"
 
   dynamic "ingress" {
     for_each = var.allow_ports
     content {
+      description = "HTTP from VPC"
       from_port   = ingress.value
       to_port     = ingress.value
       protocol    = "tcp"
@@ -65,6 +71,10 @@ resource "aws_launch_configuration" "web" {
   instance_type   = var.instance_type
   security_groups = [aws_security_group.web.id]
   user_data       = file("user_data.sh")
+
+  root_block_device {
+    encrypted = true
+  }
 
   lifecycle {
     create_before_destroy = true
@@ -104,6 +114,7 @@ resource "aws_elb" "web" {
   name               = "WebServer-HA-ELB"
   availability_zones = [data.aws_availability_zones.available.names[0], data.aws_availability_zones.available.names[1]]
   security_groups    = [aws_security_group.web.id]
+  internal           = true
 
   listener {
     lb_port           = 80
