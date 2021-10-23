@@ -104,7 +104,7 @@ resource "aws_elb" "web" {
   name               = "WebServer-HA-ELB"
   availability_zones = [data.aws_availability_zones.available.names[0], data.aws_availability_zones.available.names[1]]
   security_groups    = [aws_security_group.web.id]
-
+  internal           = true
   listener {
     lb_port           = 80
     lb_protocol       = "http"
