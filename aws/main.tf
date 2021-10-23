@@ -32,6 +32,7 @@ resource "aws_instance" "web" {
   instance_type          = var.instance_type
   vpc_security_group_ids = [aws_security_group.web.id]
   monitoring             = var.enable_detailed_monitoring
+
   metadata_options {
     http_tokens = "required"
   }
@@ -68,6 +69,10 @@ resource "aws_launch_configuration" "web" {
   instance_type   = var.instance_type
   security_groups = [aws_security_group.web.id]
   user_data       = file("user_data.sh")
+
+  root_block_device {
+    encrypted = true
+  }
 
   lifecycle {
     create_before_destroy = true
